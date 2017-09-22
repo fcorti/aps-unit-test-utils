@@ -1,4 +1,4 @@
-package org.activiti;
+package com.alfresco.aps.test.process;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -7,10 +7,11 @@ import java.util.Map;
 
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.ActivitiRule;
-import org.activiti.resources.ActivitiResources;
 import org.apache.log4j.Logger;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.alfresco.aps.testutils.resources.ActivitiResources;
 
 public class Example1Test {
 
@@ -23,8 +24,9 @@ public class Example1Test {
 	public void test() throws Exception {
 
 		// Process info.
-		String appName = "My app tp be tested";
-		String appResourcePath = "app/test";
+		String appName = "Test App";
+		String processDefinitionKey = "TestProcess";
+		String appResourcePath = "app";
 
 		/**
 		 * The only difference from a standard JUnit is here!
@@ -44,7 +46,7 @@ public class Example1Test {
 		log.info("Starting a new process instance.");
 
 		// Starting the a new process instance.
-		ProcessInstance processInstance = activitiRule.getRuntimeService().startProcessInstanceByKey(appName, variables);
+		ProcessInstance processInstance = activitiRule.getRuntimeService().startProcessInstanceByKey(processDefinitionKey, variables);
 		assertNotNull(processInstance);
 
 		log.info("Process instance started with id=" + processInstance.getId() + ".");

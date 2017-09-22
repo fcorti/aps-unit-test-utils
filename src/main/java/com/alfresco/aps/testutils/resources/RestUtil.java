@@ -1,4 +1,4 @@
-package org.activiti.resources;
+package com.alfresco.aps.testutils.resources;
 
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
