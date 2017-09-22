@@ -3,3 +3,4 @@ activiti.lic
 .project
 .settings
 .classpath
+/src/test/resources/app/
