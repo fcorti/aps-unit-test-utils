@@ -57,7 +57,7 @@ public class RestUtil {
 			String authStringEnc = new String(Base64.getUrlEncoder().encode(authString.getBytes()));
 			urlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
 
-			FileOutputStream targetStream = new FileOutputStream(path);
+			FileOutputStream targetStream = new FileOutputStream(path, false);
 			IOUtils.copy(urlConnection.getInputStream(),targetStream);
 			urlConnection.getInputStream().close();
 			targetStream.close();
