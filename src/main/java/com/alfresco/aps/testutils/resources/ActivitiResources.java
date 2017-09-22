@@ -1,16 +1,14 @@
 package com.alfresco.aps.testutils.resources;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-
 import org.activiti.engine.impl.util.json.JSONObject;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 public class ActivitiResources {
@@ -63,6 +61,12 @@ public class ActivitiResources {
 				String appResourcePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "app";
 				String appResourceZip = appResourcePath + File.separator + appResource + ".zip";
 
+				log.info("Cleaning the app directory before download."); 
+				
+				File rootDirectory = (new File(appResourcePath));
+				System.out.println(rootDirectory.isDirectory());
+				FileUtils.cleanDirectory(rootDirectory); 
+				
 				log.info("Getting the app resources locally.");
 
 				if ((new File(appResourceZip)).exists() && !replaceResource) {
@@ -132,6 +136,7 @@ public class ActivitiResources {
 	private static void zipExtract(String zipName, String zipPath, String targetFloder) {
 
 		try {
+			
 			ZipFile zipFile = new ZipFile(zipPath);
 			Enumeration<?> enu = zipFile.entries();
 			while (enu.hasMoreElements()) {
