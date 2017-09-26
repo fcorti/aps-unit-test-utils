@@ -30,7 +30,7 @@ public class UnitTestHelpers {
 	@Autowired
 	private ActivitiRule activitiRule;
 
-	public void assertTimerJobs(Integer expectedNumberOfDays, Boolean executeJob) {
+	public void assertTimerJobDateLowerThan(Integer expectedNumberOfDays, Boolean executeJob) {
 		// currently only supports day checks and one timer
 		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
 				.duedateLowerThan((new DateTime()).plusDays(expectedNumberOfDays).plusMinutes(1).toDate()).list();
@@ -42,7 +42,7 @@ public class UnitTestHelpers {
 		}
 	}
 
-	public void assertTimerJobsTimeInSeconds(Integer expectedTimeInSeconds, Boolean executeJob) {
+	public void assertTimerJobsTimeInSecondsLowerThan(Integer expectedTimeInSeconds, Boolean executeJob) {
 		// currently only supports day checks and one timer
 		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
 				.duedateLowerThan((new DateTime()).plusSeconds(expectedTimeInSeconds).toDate()).list();
