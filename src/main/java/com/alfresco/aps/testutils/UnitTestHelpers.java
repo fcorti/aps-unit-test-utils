@@ -6,13 +6,18 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.activiti.bpmn.model.ExtensionElement;
+import org.activiti.bpmn.model.FieldExtension;
+import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.Job;
@@ -112,6 +117,28 @@ public class UnitTestHelpers {
 		}
 	}
 	
+	
+	public void assertFieldExtensions(int expectedNumber, DelegateExecution execution, HashMap<String, String> expectedFields) {
+		FlowElement flowElement = activitiRule.getRepositoryService().getBpmnModel(execution.getProcessDefinitionId())
+				.getFlowElement(execution.getCurrentActivityId());
+		assertNotNull(flowElement);
+		assertTrue(flowElement instanceof ServiceTask);
+		ServiceTask serviceTask = (ServiceTask) flowElement;
+		List<FieldExtension> fieldExtensions = serviceTask.getFieldExtensions();
+		assertEquals(expectedNumber, fieldExtensions.size());
+		if(expectedNumber>0){
+			for (FieldExtension fieldExtension: fieldExtensions){
+				assertTrue(expectedFields.containsKey(fieldExtension.getFieldName()));
+				assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
+			}
+		}
+	}
+
+	private void assertNotNull(FlowElement flowElement) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void assertUserAssignment(String expectedAssignee, Task task, Boolean assignmentLookupRequired, Boolean isUserLookupBasedOnExternalId) {
 		if (assignmentLookupRequired != null && assignmentLookupRequired) {
 			Map<String, List<ExtensionElement>> extensionElements = activitiRule.getRepositoryService()
