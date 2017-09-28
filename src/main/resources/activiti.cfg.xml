@@ -44,9 +44,5 @@
 		<property name="processEngine" ref="processEngine" />
 	</bean>
 
-	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
-	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />	
-	
-	<bean id="unitTestHelpers" class="com.alfresco.aps.testutils.UnitTestHelpers" />	
 		
 </beans>

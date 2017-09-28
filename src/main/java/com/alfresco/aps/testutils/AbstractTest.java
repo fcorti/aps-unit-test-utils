@@ -1,5 +1,7 @@
 package com.alfresco.aps.testutils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import javax.mail.NoSuchProviderException;
@@ -50,9 +52,8 @@ public abstract class AbstractTest {
 
 	@Autowired
 	protected SpringProcessEngineConfiguration processEngineConfiguration;
-
-	@Autowired
-	protected static String expectedEmailMessage;
+	
+	protected static List<EmailType> actualEmails = new ArrayList<EmailType>();
 	
 	@Autowired
 	protected RestCallMockClass activiti_restCallDelegate;

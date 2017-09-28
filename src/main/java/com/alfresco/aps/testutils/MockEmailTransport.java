@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.mail.*;
+import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMultipart;
-import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MockEmailTransport extends Transport {
 
@@ -22,14 +24,39 @@ public class MockEmailTransport extends Transport {
 		try {
 
 			MimeMultipart multipartMessage = (MimeMultipart) message.getContent();
-			// Assert Email props, this will ensure that developers will always
-			// put email assertions in the testcases
-			assertEquals(1, multipartMessage.getCount());
+			EmailType email = new EmailType();
 
-			log.info(multipartMessage.getBodyPart(0).getContent().toString());
+			email.setBody(multipartMessage.getBodyPart(0).getContent().toString());
+			
+			email.setSubject(message.getSubject());
 
-			assertEquals(AbstractTest.expectedEmailMessage.replaceAll("\\s+", ""),
-					multipartMessage.getBodyPart(0).getContent().toString().replaceAll("\\s+", ""));
+			InternetAddress[] toAddressList = (InternetAddress[]) message.getRecipients(Message.RecipientType.TO);
+			if (toAddressList.length > 0) {
+				List<String> toList = new ArrayList<String>();
+				for (InternetAddress toAddress : toAddressList) {
+					toList.add(toAddress.toString());
+				}
+				email.setTo(toList);
+			}
+
+			InternetAddress[] ccAddressList = (InternetAddress[]) message.getRecipients(Message.RecipientType.CC);
+			if (ccAddressList.length > 0) {
+				List<String> ccList = new ArrayList<String>();
+				for (InternetAddress ccAddress : ccAddressList) {
+					ccList.add(ccAddress.toString());
+				}
+				email.setCc(ccList);
+			}
+
+			InternetAddress[] bccAddressList = (InternetAddress[]) message.getRecipients(Message.RecipientType.BCC);
+			if (bccAddressList.length > 0) {
+				List<String> bccList = new ArrayList<String>();
+				for (InternetAddress bccAddress : bccAddressList) {
+					bccList.add(bccAddress.toString());
+				}
+				email.setBcc(bccList);
+			}
+			AbstractTest.actualEmails.add(email);
 
 		} catch (IOException ex) {
 			log.error("Email assertion failed" + ex);

@@ -1,8 +1,6 @@
 package com.alfresco.aps.testutils;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -15,6 +13,8 @@ import java.util.TimerTask;
 
 import org.activiti.bpmn.model.ExtensionElement;
 import org.activiti.engine.TaskService;
+import org.activiti.engine.runtime.Execution;
+import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.Job;
 import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
@@ -22,9 +22,7 @@ import org.activiti.engine.test.ActivitiRule;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component("unitTestHelpers")
 public class UnitTestHelpers {
 
 	@Autowired
@@ -64,11 +62,53 @@ public class UnitTestHelpers {
 				.list().size() == 0);
 	}
 
-	public void assertSignalWait(String message, Boolean executeSignal, Map<String, Object> vars) {
-		assertEquals(1, activitiRule.getRuntimeService().createExecutionQuery().signalEventSubscriptionName(message)
-				.list().size());
-		if (executeSignal) {
-			activitiRule.getRuntimeService().signalEventReceived(message, vars);
+	public void assertSignalWait(int expectedNumber, String activityId, String signal, Boolean execute, Map<String, Object> vars) {
+		
+		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery().signalEventSubscriptionName(signal);
+		
+		if(activityId!=null){
+			executionQuery.activityId(activityId);
+		}
+		
+		assertEquals(expectedNumber, executionQuery.list().size());
+		
+		if (execute) {
+			for( Execution execution : executionQuery.list()){
+				activitiRule.getRuntimeService().signalEventReceived (signal, execution.getId(), vars);
+			}
+		}
+	}
+	
+	public void assertMessageWait(int expectedNumber, String activityId, String message, Boolean execute, Map<String, Object> vars) {
+		
+		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery().messageEventSubscriptionName(message);
+		
+		if(activityId!=null){
+			executionQuery.activityId(activityId);
+		}
+		
+		assertEquals(expectedNumber, executionQuery.list().size());
+		
+		if (execute) {
+			for( Execution execution : executionQuery.list()){
+				activitiRule.getRuntimeService().messageEventReceived(message, execution.getId(), vars);
+			}
+		}
+	}
+	
+	public void assertReceiveTask(int expectedNumber, String activityId, Boolean execute, Map<String, Object> vars) {
+		
+		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery();
+		
+		if(activityId!=null){
+			executionQuery.activityId(activityId);
+		}
+		
+		assertEquals(expectedNumber, executionQuery.list().size());
+		if (execute) {
+			for( Execution execution : executionQuery.list()){
+				activitiRule.getRuntimeService().signal(execution.getId(), vars);
+			}
 		}
 	}
 	
@@ -156,6 +196,40 @@ public class UnitTestHelpers {
 		if (expectedUsers != null) {
 			assertEquals(expectedUsers.length, candidateUserSize);
 		}
+	}
+	
+	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String[] toList, String[] ccList, String[] bccList){
+		
+		assertEquals(expectedNumber, AbstractTest.actualEmails.size());
+		if(expectedNumber>0){
+			
+			EmailType emailToAssert = AbstractTest.actualEmails.get(indexToAssert);
+			
+			assertEquals(subject, emailToAssert.getSubject());
+			
+			assertEquals(body.replaceAll("\\s+", ""), emailToAssert.getBody().replaceAll("\\s+", ""));
+			
+			if(toList!=null){
+				assertEquals(toList.length, emailToAssert.getTo().size());
+				for (String to: toList){
+					assertTrue(emailToAssert.getTo().contains(to));
+				}
+			}
+			if(ccList!=null){
+				assertEquals(ccList.length, emailToAssert.getCc().size());
+				for (String cc: ccList){
+					assertTrue(emailToAssert.getCc().contains(cc));
+				}
+			}
+			if(bccList!=null){
+				assertEquals(bccList.length, emailToAssert.getBcc().size());
+				for (String bcc: bccList){
+					assertTrue(emailToAssert.getBcc().contains(bcc));
+				}
+			}
+			
+		}
+		
 	}
 
 	public boolean waitForJobExecutorToProcessAllJobs(long maxMillisToWait, long intervalMillis) {

@@ -9,4 +9,10 @@
 	<mockito:mock id="activiti_restCallDelegate"
 		class="com.alfresco.aps.mockdelegates.RestCallMockClass" >
 		</mockito:mock>
+		
+	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
+	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />	
+	
+	<bean id="unitTestHelpers" class="com.alfresco.aps.testutils.UnitTestHelpers" />	
+	
 </beans>
