@@ -225,7 +225,7 @@ public class UnitTestHelpers {
 		}
 	}
 	
-	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String[] toList, String[] ccList, String[] bccList){
+	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String from, String[] toList, String[] ccList, String[] bccList){
 		
 		assertEquals(expectedNumber, AbstractTest.actualEmails.size());
 		if(expectedNumber>0){
@@ -235,6 +235,10 @@ public class UnitTestHelpers {
 			assertEquals(subject, emailToAssert.getSubject());
 			
 			assertEquals(body.replaceAll("\\s+", ""), emailToAssert.getBody().replaceAll("\\s+", ""));
+			
+			if(from!=null){
+				assertEquals(from, emailToAssert.getFrom());
+			}
 			
 			if(toList!=null){
 				assertEquals(toList.length, emailToAssert.getTo().size());

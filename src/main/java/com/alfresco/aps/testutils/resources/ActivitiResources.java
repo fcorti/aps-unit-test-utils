@@ -19,7 +19,7 @@ public class ActivitiResources {
 	private static final String NAME = "name";
 	private static final String ID = "id";
 
-	public static <T> void get(String appName, String appResource, Boolean replaceResource, Boolean resourceMustExistDeployed) throws Exception {
+	public static <T> void get(String appName) throws Exception {
 
 		log.info("Reading properties.");
 
@@ -36,9 +36,9 @@ public class ActivitiResources {
 					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_PASSWORD));
 		}
 		catch (Exception e) {
-			if (resourceMustExistDeployed) {
+			
 				throw e;
-			}
+			
 		}
 
 		if (appDeployments != null) {
@@ -52,19 +52,17 @@ public class ActivitiResources {
 				}
 			}
 			if (appDeployment == null) {
-				if (resourceMustExistDeployed) {
 					throw new RuntimeException("Cannot find the app deployment with name '" + appName + "'.");
-				}
 			}
 			else {
 
 				String appResourcePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "app";
-				String appResourceZip = appResourcePath + File.separator + appResource + ".zip";
+				String appResourceZip = appResourcePath + File.separator + "app.zip";
 				
 				log.info("Getting the app resources locally.");
 
-				if ((new File(appResourceZip)).exists() && !replaceResource) {
-					throw new RuntimeException("App '" + appResource + "' already exists and requested to preserve it.");
+				if ((new File(appResourceZip)).exists()) {
+					throw new RuntimeException("App zip already exists.");
 				}
 				
 				log.info("Cleaning the app directory before download."); 
@@ -89,46 +87,10 @@ public class ActivitiResources {
 			}
 		}
 	}
+	
+	public static void forceGet(String appName) throws Exception {
 
-	public static void get(String processKey, String processResource, Boolean resourceMustExistDeployed) throws Exception {
-
-		get(processKey, processResource, resourceMustExistDeployed, true);
-
-	}
-
-	public static void get(String processKey, String processResource) throws Exception {
-
-		get(processKey, processResource, false, true);
-
-	}
-
-	public static void getIfAvailable(String processKey, String processResource, Boolean replaceResource) throws Exception {
-
-		get(processKey, processResource, replaceResource, false);
-
-	}
-
-	public static void getIfAvailable(String processKey, String processResource) throws Exception {
-
-		getIfAvailable(processKey, processResource, false);
-
-	}
-
-	public static void force(String processKey, String processResource, Boolean resourceMustExistDeployed) throws Exception {
-
-		get(processKey, processResource, true, resourceMustExistDeployed);
-
-	}
-
-	public static void force(String processKey, String processResource) throws Exception {
-
-		force(processKey, processResource, true);
-
-	}
-
-	public static void forceIfAvailable(String processKey, String processResource) throws Exception {
-
-		get(processKey, processResource, true, false);
+		get(appName);
 
 	}
 

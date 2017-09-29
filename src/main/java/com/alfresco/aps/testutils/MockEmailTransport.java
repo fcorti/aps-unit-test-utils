@@ -29,6 +29,11 @@ public class MockEmailTransport extends Transport {
 			email.setBody(multipartMessage.getBodyPart(0).getContent().toString());
 			
 			email.setSubject(message.getSubject());
+			
+			if(message.getFrom()!=null && message.getFrom().length>0){
+				email.setFrom(message.getFrom()[0].toString());
+			}
+			
 
 			InternetAddress[] toAddressList = (InternetAddress[]) message.getRecipients(Message.RecipientType.TO);
 			if (toAddressList.length > 0) {

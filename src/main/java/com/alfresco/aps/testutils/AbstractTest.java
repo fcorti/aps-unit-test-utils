@@ -20,6 +20,7 @@ import org.activiti.spring.SpringProcessEngineConfiguration;
 import org.junit.BeforeClass;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.core.env.Environment;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
 import com.alfresco.aps.mockdelegates.RestCallMockClass;
@@ -28,6 +29,9 @@ public abstract class AbstractTest {
 
 	@Autowired
 	protected ApplicationContext appContext;
+	
+	@Autowired
+	protected Environment env;
 
 	@Autowired
 	protected ActivitiRule activitiRule;
@@ -57,6 +61,8 @@ public abstract class AbstractTest {
 	
 	@Autowired
 	protected RestCallMockClass activiti_restCallDelegate;
+	
+	protected static final String BPMN_RESOURCE_PATH = "src/main/resources/app/bpmn-models";
 
 	@BeforeClass
 	public static void setUp() {
