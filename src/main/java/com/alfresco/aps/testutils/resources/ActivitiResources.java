@@ -60,18 +60,17 @@ public class ActivitiResources {
 
 				String appResourcePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "app";
 				String appResourceZip = appResourcePath + File.separator + appResource + ".zip";
-
-				log.info("Cleaning the app directory before download."); 
-				
-				File rootDirectory = (new File(appResourcePath));
-				System.out.println(rootDirectory.isDirectory());
-				FileUtils.cleanDirectory(rootDirectory); 
 				
 				log.info("Getting the app resources locally.");
 
 				if ((new File(appResourceZip)).exists() && !replaceResource) {
 					throw new RuntimeException("App '" + appResource + "' already exists and requested to preserve it.");
 				}
+				
+				log.info("Cleaning the app directory before download."); 
+				
+				File rootDirectory = (new File(appResourcePath));
+				FileUtils.cleanDirectory(rootDirectory); 
 
 				RestUtil.getAppResource(
 					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_BASE_URL) 
