@@ -61,64 +61,80 @@ public class UnitTestHelpers {
 		assertTrue("Due Date is correct",
 				Days.daysBetween(new DateTime().plusDays(expectedNumberOfDays), new DateTime(dueDate)).getDays() == 0);
 	}
+	
+	public String getTaskOutcomeVariable(Task task) {
+		return "form"+task.getFormKey()+"outcome";
+	}
 
 	public void assertNullProcessInstance(String processInstanceId) {
 		assertTrue(activitiRule.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId)
 				.list().size() == 0);
 	}
 
-	public void assertSignalWait(int expectedNumber, String activityId, String signal, Boolean execute, Map<String, Object> vars) {
-		
-		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery().signalEventSubscriptionName(signal);
-		
-		if(activityId!=null){
+	public void assertHistoricVariableValues(String processInstanceId, Map<String, Object> expectedVariables) {
+		for (Map.Entry<String, Object> entry : expectedVariables.entrySet()) {
+			assertTrue(activitiRule.getHistoryService().createHistoricVariableInstanceQuery()
+					.processInstanceId(processInstanceId).variableName(entry.getKey()).singleResult().getValue().equals(entry.getValue()));
+		}
+
+	}
+
+	public void assertSignalWait(int expectedNumber, String activityId, String signal, Boolean execute,
+			Map<String, Object> vars) {
+
+		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery()
+				.signalEventSubscriptionName(signal);
+
+		if (activityId != null) {
 			executionQuery.activityId(activityId);
 		}
-		
+
 		assertEquals(expectedNumber, executionQuery.list().size());
-		
+
 		if (execute) {
-			for( Execution execution : executionQuery.list()){
-				activitiRule.getRuntimeService().signalEventReceived (signal, execution.getId(), vars);
+			for (Execution execution : executionQuery.list()) {
+				activitiRule.getRuntimeService().signalEventReceived(signal, execution.getId(), vars);
 			}
 		}
 	}
-	
-	public void assertMessageWait(int expectedNumber, String activityId, String message, Boolean execute, Map<String, Object> vars) {
-		
-		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery().messageEventSubscriptionName(message);
-		
-		if(activityId!=null){
+
+	public void assertMessageWait(int expectedNumber, String activityId, String message, Boolean execute,
+			Map<String, Object> vars) {
+
+		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery()
+				.messageEventSubscriptionName(message);
+
+		if (activityId != null) {
 			executionQuery.activityId(activityId);
 		}
-		
+
 		assertEquals(expectedNumber, executionQuery.list().size());
-		
+
 		if (execute) {
-			for( Execution execution : executionQuery.list()){
+			for (Execution execution : executionQuery.list()) {
 				activitiRule.getRuntimeService().messageEventReceived(message, execution.getId(), vars);
 			}
 		}
 	}
-	
+
 	public void assertReceiveTask(int expectedNumber, String activityId, Boolean execute, Map<String, Object> vars) {
-		
+
 		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery();
-		
-		if(activityId!=null){
+
+		if (activityId != null) {
 			executionQuery.activityId(activityId);
 		}
-		
+
 		assertEquals(expectedNumber, executionQuery.list().size());
 		if (execute) {
-			for( Execution execution : executionQuery.list()){
+			for (Execution execution : executionQuery.list()) {
 				activitiRule.getRuntimeService().signal(execution.getId(), vars);
 			}
 		}
 	}
-	
-	
-	public void assertFieldExtensions(int expectedNumber, DelegateExecution execution, HashMap<String, String> expectedFields) {
+
+	public void assertFieldExtensions(int expectedNumber, DelegateExecution execution,
+			HashMap<String, String> expectedFields) {
 		FlowElement flowElement = activitiRule.getRepositoryService().getBpmnModel(execution.getProcessDefinitionId())
 				.getFlowElement(execution.getCurrentActivityId());
 		assertNotNull(flowElement);
@@ -126,8 +142,8 @@ public class UnitTestHelpers {
 		ServiceTask serviceTask = (ServiceTask) flowElement;
 		List<FieldExtension> fieldExtensions = serviceTask.getFieldExtensions();
 		assertEquals(expectedNumber, fieldExtensions.size());
-		if(expectedNumber>0){
-			for (FieldExtension fieldExtension: fieldExtensions){
+		if (expectedNumber > 0) {
+			for (FieldExtension fieldExtension : fieldExtensions) {
 				assertTrue(expectedFields.containsKey(fieldExtension.getFieldName()));
 				assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
 			}
@@ -136,10 +152,11 @@ public class UnitTestHelpers {
 
 	private void assertNotNull(FlowElement flowElement) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
-	public void assertUserAssignment(String expectedAssignee, Task task, Boolean assignmentLookupRequired, Boolean isUserLookupBasedOnExternalId) {
+	public void assertUserAssignment(String expectedAssignee, Task task, Boolean assignmentLookupRequired,
+			Boolean isUserLookupBasedOnExternalId) {
 		if (assignmentLookupRequired != null && assignmentLookupRequired) {
 			Map<String, List<ExtensionElement>> extensionElements = activitiRule.getRepositoryService()
 					.getBpmnModel(task.getProcessDefinitionId()).getFlowElement(task.getTaskDefinitionKey())
@@ -152,7 +169,7 @@ public class UnitTestHelpers {
 				}
 			}
 		} else {
-			assertEquals(expectedAssignee, task.getAssignee()); 
+			assertEquals(expectedAssignee, task.getAssignee());
 		}
 	}
 
@@ -224,43 +241,44 @@ public class UnitTestHelpers {
 			assertEquals(expectedUsers.length, candidateUserSize);
 		}
 	}
-	
-	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String from, String[] toList, String[] ccList, String[] bccList){
-		
+
+	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String from,
+			String[] toList, String[] ccList, String[] bccList) {
+
 		assertEquals(expectedNumber, AbstractTest.actualEmails.size());
-		if(expectedNumber>0){
-			
+		if (expectedNumber > 0) {
+
 			EmailType emailToAssert = AbstractTest.actualEmails.get(indexToAssert);
-			
+
 			assertEquals(subject, emailToAssert.getSubject());
-			
+
 			assertEquals(body.replaceAll("\\s+", ""), emailToAssert.getBody().replaceAll("\\s+", ""));
-			
-			if(from!=null){
+
+			if (from != null) {
 				assertEquals(from, emailToAssert.getFrom());
 			}
-			
-			if(toList!=null){
+
+			if (toList != null) {
 				assertEquals(toList.length, emailToAssert.getTo().size());
-				for (String to: toList){
+				for (String to : toList) {
 					assertTrue(emailToAssert.getTo().contains(to));
 				}
 			}
-			if(ccList!=null){
+			if (ccList != null) {
 				assertEquals(ccList.length, emailToAssert.getCc().size());
-				for (String cc: ccList){
+				for (String cc : ccList) {
 					assertTrue(emailToAssert.getCc().contains(cc));
 				}
 			}
-			if(bccList!=null){
+			if (bccList != null) {
 				assertEquals(bccList.length, emailToAssert.getBcc().size());
-				for (String bcc: bccList){
+				for (String bcc : bccList) {
 					assertTrue(emailToAssert.getBcc().contains(bcc));
 				}
 			}
-			
+
 		}
-		
+
 	}
 
 	public boolean waitForJobExecutorToProcessAllJobs(long maxMillisToWait, long intervalMillis) {

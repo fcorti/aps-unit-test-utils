@@ -5,14 +5,17 @@
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
                            http://www.springframework.org/schema/tx      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
                            http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
+
+	<bean id="activiti_flowConditionsBean" class="com.alfresco.aps.mockdelegates.FlowConditionsBean" />
 	
 	<mockito:mock id="activiti_restCallDelegate"
-		class="com.alfresco.aps.mockdelegates.RestCallMockClass" >
-		</mockito:mock>
-		
+		class="com.alfresco.aps.mockdelegates.RestCallMockClass">
+	</mockito:mock>
+
+
 	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
-	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />	
-	
-	<bean id="unitTestHelpers" class="com.alfresco.aps.testutils.UnitTestHelpers" />	
-	
+	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />
+
+	<bean id="unitTestHelpers" class="com.alfresco.aps.testutils.UnitTestHelpers" />
+
 </beans>
