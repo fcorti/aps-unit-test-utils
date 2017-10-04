@@ -1,7 +1,7 @@
 package com.alfresco.aps.testutils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static com.alfresco.aps.testutils.TestUtilsConstants.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +26,8 @@ import org.activiti.engine.task.Task;
 import org.activiti.engine.test.ActivitiRule;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class UnitTestHelpers {
@@ -57,9 +59,33 @@ public class UnitTestHelpers {
 		}
 	}
 
-	public void assertTaskDueDate(Integer expectedNumberOfDays, Date dueDate) {
-		assertTrue("Due Date is correct",
-				Days.daysBetween(new DateTime().plusDays(expectedNumberOfDays), new DateTime(dueDate)).getDays() == 0);
+	public void assertTaskDueDate(Integer expectedNumberFromCreateTime, String expectedUnit, Task task) {
+		Date dueDate = task.getDueDate();
+		Date createTime = task.getCreateTime();
+		assertNotNull(dueDate);
+		
+		//Ignoring seconds as it is hard to get the precision!
+		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
+		String exepctedDate;
+		switch (expectedUnit) {
+			case TIME_UNIT_DAY:
+				exepctedDate = formatter.print(new DateTime(createTime).plusDays(expectedNumberFromCreateTime));
+				break;
+			case TIME_UNIT_HOUR:
+				exepctedDate = formatter.print(new DateTime(createTime).plusHours(expectedNumberFromCreateTime));
+				break;
+			case TIME_UNIT_MINUTE:
+				exepctedDate = formatter.print(new DateTime(createTime).plusMinutes(expectedNumberFromCreateTime));
+				break;
+			case TIME_UNIT_SECOND:
+				exepctedDate = formatter.print(new DateTime(createTime).plusSeconds(expectedNumberFromCreateTime));
+				break;
+			default:
+				exepctedDate = formatter.print(new DateTime(createTime));
+				break;
+		} 
+		String actualDate = formatter.print(new DateTime(dueDate));
+		assertEquals("Due Date is correct", exepctedDate, actualDate);
 	}
 	
 	public String getTaskOutcomeVariable(Task task) {
@@ -148,11 +174,6 @@ public class UnitTestHelpers {
 				assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
 			}
 		}
-	}
-
-	private void assertNotNull(FlowElement flowElement) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void assertUserAssignment(String expectedAssignee, Task task, Boolean assignmentLookupRequired,
