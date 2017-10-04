@@ -19,14 +19,6 @@ import com.activiti.dmn.engine.DmnRepositoryService;
 import com.activiti.dmn.engine.DmnRuleService;
 import com.activiti.dmn.engine.domain.entity.DmnDeployment;
 import com.activiti.dmn.engine.test.ActivitiDmnRule;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
 
 public abstract class AbstractDmnTest {
 
