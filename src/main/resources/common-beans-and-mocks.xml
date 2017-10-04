@@ -8,10 +8,13 @@
 
 	<bean id="activiti_flowConditionsBean" class="com.alfresco.aps.mockdelegates.FlowConditionsBean" />
 	
+	<mockito:mock id="activiti_executeDecisionDelegate"
+		class="com.alfresco.aps.mockdelegates.ExecuteDecisionBean">
+	</mockito:mock>
+	
 	<mockito:mock id="activiti_restCallDelegate"
 		class="com.alfresco.aps.mockdelegates.RestCallMockClass">
 	</mockito:mock>
-
 
 	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
 	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />

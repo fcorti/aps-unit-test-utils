@@ -23,6 +23,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
+import com.alfresco.aps.mockdelegates.ExecuteDecisionBean;
 import com.alfresco.aps.mockdelegates.RestCallMockClass;
 
 public abstract class AbstractTest {
@@ -61,6 +62,9 @@ public abstract class AbstractTest {
 	
 	@Autowired
 	protected RestCallMockClass activiti_restCallDelegate;
+	
+	@Autowired
+	protected ExecuteDecisionBean activiti_executeDecisionDelegate;
 
 	@BeforeClass
 	public static void setUp() {
