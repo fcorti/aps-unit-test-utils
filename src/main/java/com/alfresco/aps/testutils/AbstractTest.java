@@ -61,8 +61,6 @@ public abstract class AbstractTest {
 	
 	@Autowired
 	protected RestCallMockClass activiti_restCallDelegate;
-	
-	protected static final String BPMN_RESOURCE_PATH = "src/main/resources/app/bpmn-models";
 
 	@BeforeClass
 	public static void setUp() {

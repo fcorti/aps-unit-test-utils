@@ -5,11 +5,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import org.activiti.engine.impl.util.json.JSONObject;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import static com.alfresco.aps.testutils.TestUtilsConstants.*;
 
 public class ActivitiResources {
 
@@ -83,6 +87,15 @@ public class ActivitiResources {
 
 				zipExtract(appName, appResourceZip, appResourcePath);
 				(new File(appResourceZip)).delete();
+				
+				Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
+				while (it.hasNext()) {
+					String dmnModel = ((File) it.next()).getPath();
+					String extension = FilenameUtils.getExtension(dmnModel);
+					if (extension.equals("json")) {
+						DMNConverter.convertJsonModelToDMNXml(dmnModel, StringUtils.substringBefore(dmnModel, ".json")+".dmn");
+					}
+				}
 
 			}
 		}
