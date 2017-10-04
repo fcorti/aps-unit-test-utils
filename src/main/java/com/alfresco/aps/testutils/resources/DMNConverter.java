@@ -13,6 +13,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+/*
+ * Temporary workaround to create dmn xml from json until https://issues.alfresco.com/jira/browse/ACTIVITI-994 is fixed
+ */
 public class DMNConverter {
 	
 	public static void convertJsonModelToDMNXml(String dmnFilePath, String outputPath) throws JsonProcessingException, IOException{
