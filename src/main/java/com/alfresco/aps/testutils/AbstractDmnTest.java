@@ -57,23 +57,7 @@ public abstract class AbstractDmnTest {
 	
 	@Before
 	public void before() throws Exception {
-
-		//Create tables using liquibase
-		ComboPooledDataSource ds = new ComboPooledDataSource();
-		ds.setDriverClass(dmnEngineConfiguration.getJdbcDriver());
-		ds.setJdbcUrl(dmnEngineConfiguration.getJdbcUrl());
-		ds.setUser(dmnEngineConfiguration.getJdbcUsername());
-		ds.setPassword(dmnEngineConfiguration.getJdbcPassword());
-
-		DatabaseConnection connection = new JdbcConnection(ds.getConnection());
-		Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-
-		//Using a liquibase file in activiti-app-data jar file.
-		Liquibase liquibase = new Liquibase("META-INF/liquibase/db-changelog-onpremise.xml",
-				new ClassLoaderResourceAccessor(), database);
-		liquibase.dropAll();
-		liquibase.update("dmn");
-
+		
 		//Deploy the dmn files
 		Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
 		while (it.hasNext()) {
