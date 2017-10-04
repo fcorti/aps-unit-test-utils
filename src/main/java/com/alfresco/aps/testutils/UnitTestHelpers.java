@@ -34,28 +34,24 @@ public class UnitTestHelpers {
 
 	@Autowired
 	private ActivitiRule activitiRule;
-
-	public void assertTimerJobDateLowerThan(Integer expectedNumberOfDays, Boolean executeJob) {
-		// currently only supports day checks and one timer
+	
+	public void assertTimerJob(int expectedJobListSize, Integer expectedTimeFromNow, String expectedTimeUnit, Boolean executeJob) {
+		// only supports precision up to minute level
+		Date now = new Date();
+		DateTime expectedDate = calculateExpectedDate(expectedTimeFromNow, expectedTimeUnit, now);
 		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
-				.duedateLowerThan((new DateTime()).plusDays(expectedNumberOfDays).plusMinutes(1).toDate()).list();
-		assertEquals(1, timerJobList.size());
-		assertTrue("Due Date is correct", Days.daysBetween(new DateTime().plusDays(expectedNumberOfDays),
-				new DateTime(timerJobList.get(0).getDuedate())).getDays() == 0);
-		if (executeJob) {
-			activitiRule.getManagementService().executeJob(timerJobList.get(0).getId());
-		}
-	}
-
-	public void assertTimerJobsTimeInSecondsLowerThan(Integer expectedTimeInSeconds, Boolean executeJob) {
-		// currently only supports day checks and one timer
-		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
-				.duedateLowerThan((new DateTime()).plusSeconds(expectedTimeInSeconds).toDate()).list();
-		assertEquals(1, timerJobList.size());
-		assertTrue("Due Date is correct", Days.daysBetween(new DateTime().plusSeconds(expectedTimeInSeconds),
-				new DateTime(timerJobList.get(0).getDuedate())).getDays() == 0);
-		if (executeJob) {
-			activitiRule.getManagementService().executeJob(timerJobList.get(0).getId());
+				.duedateLowerThan(expectedDate.plusMinutes(1).toDate()).list();
+		assertEquals(expectedJobListSize, timerJobList.size());
+		
+		//Ignoring seconds as it is hard to get the precision!
+		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
+		for(Job job: timerJobList){
+			String actualDateString = formatter.print(new DateTime(job.getDuedate()));
+			String exepctedDateString = formatter.print(expectedDate);
+			assertEquals("Due Date is correct", exepctedDateString, actualDateString);
+			if (executeJob) {
+				activitiRule.getManagementService().executeJob(job.getId());
+			}
 		}
 	}
 
@@ -66,26 +62,31 @@ public class UnitTestHelpers {
 		
 		//Ignoring seconds as it is hard to get the precision!
 		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
-		String exepctedDate;
-		switch (expectedUnit) {
-			case TIME_UNIT_DAY:
-				exepctedDate = formatter.print(new DateTime(createTime).plusDays(expectedNumberFromCreateTime));
-				break;
-			case TIME_UNIT_HOUR:
-				exepctedDate = formatter.print(new DateTime(createTime).plusHours(expectedNumberFromCreateTime));
-				break;
-			case TIME_UNIT_MINUTE:
-				exepctedDate = formatter.print(new DateTime(createTime).plusMinutes(expectedNumberFromCreateTime));
-				break;
-			case TIME_UNIT_SECOND:
-				exepctedDate = formatter.print(new DateTime(createTime).plusSeconds(expectedNumberFromCreateTime));
-				break;
-			default:
-				exepctedDate = formatter.print(new DateTime(createTime));
-				break;
-		} 
+		String exepctedDate = formatter.print(calculateExpectedDate(expectedNumberFromCreateTime, expectedUnit, createTime)); 
 		String actualDate = formatter.print(new DateTime(dueDate));
 		assertEquals("Due Date is correct", exepctedDate, actualDate);
+	}
+
+	private DateTime calculateExpectedDate(Integer expectedNumber, String expectedUnit, Date createTime) {
+		DateTime exepctedDate;
+		switch (expectedUnit) {
+			case TIME_UNIT_DAY:
+				exepctedDate = new DateTime(createTime).plusDays(expectedNumber);
+				break;
+			case TIME_UNIT_HOUR:
+				exepctedDate = new DateTime(createTime).plusHours(expectedNumber);
+				break;
+			case TIME_UNIT_MINUTE:
+				exepctedDate = new DateTime(createTime).plusMinutes(expectedNumber);
+				break;
+			case TIME_UNIT_SECOND:
+				exepctedDate = new DateTime(createTime).plusSeconds(expectedNumber);
+				break;
+			default:
+				exepctedDate = null;
+				break;
+		}
+		return exepctedDate;
 	}
 	
 	public String getTaskOutcomeVariable(Task task) {
