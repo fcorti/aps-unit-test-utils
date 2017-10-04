@@ -1,0 +1,29 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:mockito="http://www.mockito.org/spring/mockito" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/tx      http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+                           http://www.mockito.org/spring/mockito http://www.mockito.org/spring/mockito.xsd">
+                           
+	<bean id="dmnEngineConfiguration" class="com.activiti.dmn.engine.impl.cfg.StandaloneDmnEngineConfiguration" init-method="buildDmnEngine">
+        <property name="jdbcUrl" value="jdbc:h2:mem:activiti;DB_CLOSE_DELAY=1000" />
+        <property name="jdbcDriver" value="org.h2.Driver" />
+        <property name="jdbcUsername" value="sa" />
+        <property name="jdbcPassword" value="" />
+    </bean>
+    
+    <bean id="dmnEngine" class="com.activiti.dmn.engine.impl.DmnEngineImpl">
+		<constructor-arg ref="dmnEngineConfiguration" />
+	</bean>
+	
+	<bean id="activitiDmnRule" class="com.activiti.dmn.engine.test.ActivitiDmnRule">
+		<constructor-arg ref="dmnEngine" />
+	</bean>
+	
+	<bean id="repositoryService" factory-bean="dmnEngine"
+    		factory-method="getDmnRepositoryService" />
+    		
+    <bean id="ruleService" factory-bean="dmnEngine"
+		factory-method="getDmnRuleService" />
+</beans>
