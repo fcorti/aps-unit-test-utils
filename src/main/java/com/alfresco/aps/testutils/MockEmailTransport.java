@@ -61,7 +61,7 @@ public class MockEmailTransport extends Transport {
 				}
 				email.setBcc(bccList);
 			}
-			AbstractTest.actualEmails.add(email);
+			AbstractBpmnTest.actualEmails.add(email);
 
 		} catch (IOException ex) {
 			log.error("Email assertion failed" + ex);

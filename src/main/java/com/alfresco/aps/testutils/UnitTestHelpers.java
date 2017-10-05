@@ -15,6 +15,7 @@ import java.util.TimerTask;
 import org.activiti.bpmn.model.ExtensionElement;
 import org.activiti.bpmn.model.FieldExtension;
 import org.activiti.bpmn.model.FlowElement;
+import org.activiti.bpmn.model.ReceiveTask;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.DelegateExecution;
@@ -33,18 +34,19 @@ public class UnitTestHelpers {
 
 	@Autowired
 	private ActivitiRule activitiRule;
-	
-	public void assertTimerJob(int expectedJobListSize, Integer expectedTimeFromNow, String expectedTimeUnit, Boolean executeJob) {
+
+	public void assertTimerJob(int expectedJobListSize, Integer expectedTimeFromNow, String expectedTimeUnit,
+			Boolean executeJob) {
 		// only supports precision up to minute level
 		Date now = new Date();
 		DateTime expectedDate = calculateExpectedDate(expectedTimeFromNow, expectedTimeUnit, now);
 		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
 				.duedateLowerThan(expectedDate.plusMinutes(1).toDate()).list();
 		assertEquals(expectedJobListSize, timerJobList.size());
-		
-		//Ignoring seconds as it is hard to get the precision!
+
+		// Ignoring seconds as it is hard to get the precision!
 		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
-		for(Job job: timerJobList){
+		for (Job job : timerJobList) {
 			String actualDateString = formatter.print(new DateTime(job.getDuedate()));
 			String exepctedDateString = formatter.print(expectedDate);
 			assertEquals("Due Date is correct", exepctedDateString, actualDateString);
@@ -58,10 +60,11 @@ public class UnitTestHelpers {
 		Date dueDate = task.getDueDate();
 		Date createTime = task.getCreateTime();
 		assertNotNull(dueDate);
-		
-		//Ignoring seconds as it is hard to get the precision!
+
+		// Ignoring seconds as it is hard to get the precision!
 		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
-		String exepctedDate = formatter.print(calculateExpectedDate(expectedNumberFromCreateTime, expectedUnit, createTime)); 
+		String exepctedDate = formatter
+				.print(calculateExpectedDate(expectedNumberFromCreateTime, expectedUnit, createTime));
 		String actualDate = formatter.print(new DateTime(dueDate));
 		assertEquals("Due Date is correct", exepctedDate, actualDate);
 	}
@@ -69,27 +72,27 @@ public class UnitTestHelpers {
 	private DateTime calculateExpectedDate(Integer expectedNumber, String expectedUnit, Date createTime) {
 		DateTime exepctedDate;
 		switch (expectedUnit) {
-			case TIME_UNIT_DAY:
-				exepctedDate = new DateTime(createTime).plusDays(expectedNumber);
-				break;
-			case TIME_UNIT_HOUR:
-				exepctedDate = new DateTime(createTime).plusHours(expectedNumber);
-				break;
-			case TIME_UNIT_MINUTE:
-				exepctedDate = new DateTime(createTime).plusMinutes(expectedNumber);
-				break;
-			case TIME_UNIT_SECOND:
-				exepctedDate = new DateTime(createTime).plusSeconds(expectedNumber);
-				break;
-			default:
-				exepctedDate = null;
-				break;
+		case TIME_UNIT_DAY:
+			exepctedDate = new DateTime(createTime).plusDays(expectedNumber);
+			break;
+		case TIME_UNIT_HOUR:
+			exepctedDate = new DateTime(createTime).plusHours(expectedNumber);
+			break;
+		case TIME_UNIT_MINUTE:
+			exepctedDate = new DateTime(createTime).plusMinutes(expectedNumber);
+			break;
+		case TIME_UNIT_SECOND:
+			exepctedDate = new DateTime(createTime).plusSeconds(expectedNumber);
+			break;
+		default:
+			exepctedDate = null;
+			break;
 		}
 		return exepctedDate;
 	}
-	
+
 	public String getTaskOutcomeVariable(Task task) {
-		return "form"+task.getFormKey()+"outcome";
+		return "form" + task.getFormKey() + "outcome";
 	}
 
 	public void assertNullProcessInstance(String processInstanceId) {
@@ -100,7 +103,8 @@ public class UnitTestHelpers {
 	public void assertHistoricVariableValues(String processInstanceId, Map<String, Object> expectedVariables) {
 		for (Map.Entry<String, Object> entry : expectedVariables.entrySet()) {
 			assertTrue(activitiRule.getHistoryService().createHistoricVariableInstanceQuery()
-					.processInstanceId(processInstanceId).variableName(entry.getKey()).singleResult().getValue().equals(entry.getValue()));
+					.processInstanceId(processInstanceId).variableName(entry.getKey()).singleResult().getValue()
+					.equals(entry.getValue()));
 		}
 
 	}
@@ -143,19 +147,23 @@ public class UnitTestHelpers {
 		}
 	}
 
-	public void assertReceiveTask(int expectedNumber, String activityId, Boolean execute, Map<String, Object> vars) {
+	public void assertReceiveTask(int expectedNumber, Boolean execute, Map<String, Object> vars,
+			String processDefinitionId) {
 
 		ExecutionQuery executionQuery = activitiRule.getRuntimeService().createExecutionQuery();
 
-		if (activityId != null) {
-			executionQuery.activityId(activityId);
-		}
-
-		assertEquals(expectedNumber, executionQuery.list().size());
 		if (execute) {
+			int i = 0;
 			for (Execution execution : executionQuery.list()) {
-				activitiRule.getRuntimeService().signal(execution.getId(), vars);
+				FlowElement flowElement = activitiRule.getRepositoryService().getBpmnModel(processDefinitionId)
+						.getFlowElement(execution.getActivityId());
+				if (flowElement instanceof ReceiveTask) {
+					i++;
+					activitiRule.getRuntimeService().signal(execution.getId(), vars);
+				}
+
 			}
+			assertEquals(expectedNumber, i);
 		}
 	}
 
@@ -266,10 +274,10 @@ public class UnitTestHelpers {
 	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String from,
 			String[] toList, String[] ccList, String[] bccList) {
 
-		assertEquals(expectedNumber, AbstractTest.actualEmails.size());
+		assertEquals(expectedNumber, AbstractBpmnTest.actualEmails.size());
 		if (expectedNumber > 0) {
 
-			EmailType emailToAssert = AbstractTest.actualEmails.get(indexToAssert);
+			EmailType emailToAssert = AbstractBpmnTest.actualEmails.get(indexToAssert);
 
 			assertEquals(subject, emailToAssert.getSubject());
 
