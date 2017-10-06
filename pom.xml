@@ -73,21 +73,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-			<!-- Version Number Management for Maven configuration units -->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>versions-maven-plugin</artifactId>
-				<version>2.5</version>
-				<configuration>
-					<allowMajorUpdates>false</allowMajorUpdates>
-					<allowMinorUpdates>false</allowMinorUpdates>
-					<allowIncrementalUpdates>true</allowIncrementalUpdates>
-					<allowSnapshots>false</allowSnapshots>
-					<includes>
-						<include>com.alfresco.aps:*</include>
-					</includes>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 	<repositories>
