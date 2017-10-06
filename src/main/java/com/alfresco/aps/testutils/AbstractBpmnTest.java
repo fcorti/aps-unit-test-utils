@@ -40,6 +40,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.mock.jndi.SimpleNamingContextBuilder;
 
+import com.alfresco.aps.mockdelegates.AlfrescoPublishDelegate;
 import com.alfresco.aps.mockdelegates.ExecuteDecisionBean;
 import com.alfresco.aps.mockdelegates.RestCallMockClass;
 import com.alfresco.aps.testutils.resources.ActivitiResources;
@@ -83,6 +84,9 @@ public abstract class AbstractBpmnTest {
 	
 	@Autowired
 	protected ExecuteDecisionBean activiti_executeDecisionDelegate;
+	
+	@Autowired
+	protected AlfrescoPublishDelegate activiti_publishAlfrescoDelegate;
 	
 	protected static Set<String> activityIdSet = new TreeSet<String>();
 	protected static Set<String> flowElementIdSet = new TreeSet<String>();

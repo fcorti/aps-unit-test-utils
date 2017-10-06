@@ -177,10 +177,17 @@ public class UnitTestHelpers {
 		List<FieldExtension> fieldExtensions = serviceTask.getFieldExtensions();
 		assertEquals(expectedNumber, fieldExtensions.size());
 		if (expectedNumber > 0) {
-			for (FieldExtension fieldExtension : fieldExtensions) {
-				assertTrue(expectedFields.containsKey(fieldExtension.getFieldName()));
-				assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
+			for (Map.Entry<String, String> field : expectedFields.entrySet()) {
+				boolean fieldFound = false;
+				for (FieldExtension fieldExtension : fieldExtensions) {
+					if(fieldExtension.getFieldName().equals(field.getKey())){
+						fieldFound = true;
+						assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
+					}
+				}
+				assertTrue(fieldFound);
 			}
+			
 		}
 	}
 

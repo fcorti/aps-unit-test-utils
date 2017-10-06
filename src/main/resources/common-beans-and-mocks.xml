@@ -15,6 +15,10 @@
 	<mockito:mock id="activiti_restCallDelegate"
 		class="com.alfresco.aps.mockdelegates.RestCallMockClass">
 	</mockito:mock>
+	<mockito:mock id="activiti_publishAlfrescoDelegate"
+		class="com.alfresco.aps.mockdelegates.AlfrescoPublishDelegate">
+	</mockito:mock>
+	
 
 	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
 	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />
