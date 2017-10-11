@@ -1,6 +1,6 @@
 package com.alfresco.aps.testutils;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.*;
 import static com.alfresco.aps.testutils.TestUtilsConstants.*;
 
 import java.util.ArrayList;
@@ -42,14 +42,14 @@ public class UnitTestHelpers {
 		DateTime expectedDate = calculateExpectedDate(expectedTimeFromNow, expectedTimeUnit, now);
 		List<Job> timerJobList = activitiRule.getManagementService().createJobQuery().timers()
 				.duedateLowerThan(expectedDate.plusMinutes(1).toDate()).list();
-		assertEquals(expectedJobListSize, timerJobList.size());
+		assertThat(timerJobList.size()).as("Check timer size").isEqualTo(expectedJobListSize);
 
 		// Ignoring seconds as it is hard to get the precision!
 		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
 		for (Job job : timerJobList) {
 			String actualDateString = formatter.print(new DateTime(job.getDuedate()));
 			String exepctedDateString = formatter.print(expectedDate);
-			assertEquals("Due Date is correct", exepctedDateString, actualDateString);
+			assertThat(actualDateString).as("Check due date").isEqualTo(exepctedDateString);
 			if (executeJob) {
 				activitiRule.getManagementService().executeJob(job.getId());
 			}
@@ -59,14 +59,14 @@ public class UnitTestHelpers {
 	public void assertTaskDueDate(Integer expectedNumberFromCreateTime, String expectedUnit, Task task) {
 		Date dueDate = task.getDueDate();
 		Date createTime = task.getCreateTime();
-		assertNotNull(dueDate);
+		assertThat(dueDate).isNotNull();
 
 		// Ignoring seconds as it is hard to get the precision!
 		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
 		String exepctedDate = formatter
 				.print(calculateExpectedDate(expectedNumberFromCreateTime, expectedUnit, createTime));
 		String actualDate = formatter.print(new DateTime(dueDate));
-		assertEquals("Due Date is correct", exepctedDate, actualDate);
+		assertThat(actualDate).as("Check due date").isEqualTo(exepctedDate);
 	}
 
 	private DateTime calculateExpectedDate(Integer expectedNumber, String expectedUnit, Date createTime) {
@@ -96,15 +96,15 @@ public class UnitTestHelpers {
 	}
 
 	public void assertNullProcessInstance(String processInstanceId) {
-		assertTrue(activitiRule.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId)
-				.list().size() == 0);
+		assertThat(activitiRule.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId)
+				.list().size() == 0).isTrue();
 	}
 
 	public void assertHistoricVariableValues(String processInstanceId, Map<String, Object> expectedVariables) {
 		for (Map.Entry<String, Object> entry : expectedVariables.entrySet()) {
-			assertTrue(activitiRule.getHistoryService().createHistoricVariableInstanceQuery()
+			assertThat(activitiRule.getHistoryService().createHistoricVariableInstanceQuery()
 					.processInstanceId(processInstanceId).variableName(entry.getKey()).singleResult().getValue()
-					.equals(entry.getValue()));
+					.equals(entry.getValue())).isTrue();
 		}
 
 	}
@@ -119,7 +119,8 @@ public class UnitTestHelpers {
 			executionQuery.activityId(activityId);
 		}
 
-		assertEquals(expectedNumber, executionQuery.list().size());
+
+		assertThat(executionQuery.list().size()).as("Check execution list size").isEqualTo(expectedNumber);
 
 		if (execute) {
 			for (Execution execution : executionQuery.list()) {
@@ -138,7 +139,7 @@ public class UnitTestHelpers {
 			executionQuery.activityId(activityId);
 		}
 
-		assertEquals(expectedNumber, executionQuery.list().size());
+		assertThat(executionQuery.list().size()).as("Check execution list size").isEqualTo(expectedNumber);
 
 		if (execute) {
 			for (Execution execution : executionQuery.list()) {
@@ -163,7 +164,7 @@ public class UnitTestHelpers {
 				}
 
 			}
-			assertEquals(expectedNumber, i);
+			assertThat(i).as("Check receive task count").isEqualTo(expectedNumber);
 		}
 	}
 
@@ -171,21 +172,23 @@ public class UnitTestHelpers {
 			HashMap<String, String> expectedFields) {
 		FlowElement flowElement = activitiRule.getRepositoryService().getBpmnModel(execution.getProcessDefinitionId())
 				.getFlowElement(execution.getCurrentActivityId());
-		assertNotNull(flowElement);
-		assertTrue(flowElement instanceof ServiceTask);
+
+		assertThat(flowElement).isNotNull();
+		
+		assertThat(flowElement instanceof ServiceTask).isTrue();
 		ServiceTask serviceTask = (ServiceTask) flowElement;
 		List<FieldExtension> fieldExtensions = serviceTask.getFieldExtensions();
-		assertEquals(expectedNumber, fieldExtensions.size());
+		assertThat(fieldExtensions.size()).as("Check field extension count").isEqualTo(expectedNumber);
 		if (expectedNumber > 0) {
 			for (Map.Entry<String, String> field : expectedFields.entrySet()) {
 				boolean fieldFound = false;
 				for (FieldExtension fieldExtension : fieldExtensions) {
 					if(fieldExtension.getFieldName().equals(field.getKey())){
 						fieldFound = true;
-						assertEquals(expectedFields.get(fieldExtension.getFieldName()), fieldExtension.getStringValue());
+						assertThat(fieldExtension.getStringValue()).as("Check field extension ").isEqualTo(expectedFields.get(fieldExtension.getFieldName()));
 					}
 				}
-				assertTrue(fieldFound);
+				assertThat(fieldFound).isTrue();
 			}
 			
 		}
@@ -199,13 +202,13 @@ public class UnitTestHelpers {
 					.getExtensionElements();
 			for (Map.Entry<String, List<ExtensionElement>> entry : extensionElements.entrySet()) {
 				if (isUserLookupBasedOnExternalId && entry.getKey().equals("assignee-info-externalid")) {
-					assertEquals(expectedAssignee, entry.getValue().get(0).getElementText());
+					assertThat(entry.getValue().get(0).getElementText()).as("Check assignee id ").isEqualTo(expectedAssignee);
 				} else if (!isUserLookupBasedOnExternalId && entry.getKey().equals("assignee-info-email")) {
-					assertEquals(expectedAssignee, entry.getValue().get(0).getElementText());
+					assertThat(entry.getValue().get(0).getElementText()).as("Check assignee email ").isEqualTo(expectedAssignee);
 				}
 			}
 		} else {
-			assertEquals(expectedAssignee, task.getAssignee());
+			assertThat(task.getAssignee()).as("Check assignee ").isEqualTo(expectedAssignee);
 		}
 	}
 
@@ -257,59 +260,59 @@ public class UnitTestHelpers {
 			if (idLink.getGroupId() != null) {
 				String groupId = idLink.getGroupId();
 				// Assert candidate group
-				assertTrue(groupIdArray.contains(groupId));
+				assertThat(groupIdArray.contains(groupId)).isTrue();
 				candidateGroupSize++;
 			}
 			if (idLink.getUserId() != null && !idLink.getType().equals("assignee")) {
 				String userId = idLink.getUserId();
 				// Assert candidate user
-				assertTrue(userIdArray.contains(userId));
+				assertThat(userIdArray.contains(userId)).isTrue();
 				candidateUserSize++;
 			}
 		}
 
 		// Assert candidate group count
 		if (expectedGroups != null) {
-			assertEquals(expectedGroups.length, candidateGroupSize);
+			assertThat(candidateGroupSize).as("Check candidate group size ").isEqualTo(expectedGroups.length);
 		}
 		// Assert candidate user count
 		if (expectedUsers != null) {
-			assertEquals(expectedUsers.length, candidateUserSize);
+			assertThat(candidateUserSize).as("Check user size ").isEqualTo(expectedUsers.length);
 		}
 	}
 
 	public void assertEmails(int expectedNumber, int indexToAssert, String body, String subject, String from,
 			String[] toList, String[] ccList, String[] bccList) {
 
-		assertEquals(expectedNumber, AbstractBpmnTest.actualEmails.size());
+
+		assertThat(AbstractBpmnTest.actualEmails.size()).as("Check email count ").isEqualTo(expectedNumber);
 		if (expectedNumber > 0) {
 
 			EmailType emailToAssert = AbstractBpmnTest.actualEmails.get(indexToAssert);
-
-			assertEquals(subject, emailToAssert.getSubject());
-
-			assertEquals(body.replaceAll("\\s+", ""), emailToAssert.getBody().replaceAll("\\s+", ""));
-
+			
+			assertThat(emailToAssert.getSubject()).as("Check email subject ").isEqualTo(subject);
+			assertThat(emailToAssert.getBody().replaceAll("\\s+", "")).as("Check email body ").isEqualTo(body.replaceAll("\\s+", ""));
+			
 			if (from != null) {
-				assertEquals(from, emailToAssert.getFrom());
+				assertThat(emailToAssert.getFrom()).as("Check email from address ").isEqualTo(from);
 			}
 
 			if (toList != null) {
-				assertEquals(toList.length, emailToAssert.getTo().size());
+				assertThat(emailToAssert.getTo().size()).as("Check \"to\" address count ").isEqualTo(toList.length);
 				for (String to : toList) {
-					assertTrue(emailToAssert.getTo().contains(to));
+					assertThat(emailToAssert.getTo().contains(to)).isTrue();
 				}
 			}
 			if (ccList != null) {
-				assertEquals(ccList.length, emailToAssert.getCc().size());
+				assertThat(emailToAssert.getCc().size()).as("Check email count ").isEqualTo(ccList.length);
 				for (String cc : ccList) {
-					assertTrue(emailToAssert.getCc().contains(cc));
+					assertThat(emailToAssert.getCc().contains(cc)).isTrue();
 				}
 			}
 			if (bccList != null) {
-				assertEquals(bccList.length, emailToAssert.getBcc().size());
+				assertThat(emailToAssert.getBcc().size()).as("Check email count ").isEqualTo(bccList.length);
 				for (String bcc : bccList) {
-					assertTrue(emailToAssert.getBcc().contains(bcc));
+					assertThat(emailToAssert.getBcc().contains(bcc)).isTrue();
 				}
 			}
 
