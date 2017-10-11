@@ -8,7 +8,7 @@
 
 	<bean id="activiti_flowConditionsBean" class="com.alfresco.aps.mockdelegates.FlowConditionsBean" />
 	
-	<mockito:mock id="activiti_executeDecisionDelegate"
+	<!-- <mockito:mock id="activiti_executeDecisionDelegate"
 		class="com.alfresco.aps.mockdelegates.ExecuteDecisionBean">
 	</mockito:mock>
 	
@@ -17,7 +17,17 @@
 	</mockito:mock>
 	<mockito:mock id="activiti_publishAlfrescoDelegate"
 		class="com.alfresco.aps.mockdelegates.AlfrescoPublishDelegate">
-	</mockito:mock>
+	</mockito:mock> -->
+	
+	<bean id="activiti_executeDecisionDelegate" class="org.mockito.Mockito" factory-method="mock"> 
+    	<constructor-arg value="com.alfresco.aps.mockdelegates.ExecuteDecisionBean" /> 
+	</bean>
+	<bean id="activiti_restCallDelegate" class="org.mockito.Mockito" factory-method="mock"> 
+    	<constructor-arg value="com.alfresco.aps.mockdelegates.RestCallMockClass" /> 
+	</bean>
+	<bean id="activiti_publishAlfrescoDelegate" class="org.mockito.Mockito" factory-method="mock"> 
+    	<constructor-arg value="com.alfresco.aps.mockdelegates.AlfrescoPublishDelegate" /> 
+	</bean> 
 	
 
 	<bean id="activitiResources" class="com.alfresco.aps.testutils.resources.ActivitiResources" />
