@@ -87,14 +87,17 @@ public class ActivitiResources {
 
 				zipExtract(appName, appResourceZip, appResourcePath);
 				(new File(appResourceZip)).delete();
-				
-				Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
-				while (it.hasNext()) {
-					String dmnModel = ((File) it.next()).getPath();
-					String extension = FilenameUtils.getExtension(dmnModel);
-					if (extension.equals("json")) {
-						DMNConverter.convertJsonModelToDMNXml(dmnModel, StringUtils.substringBefore(dmnModel, ".json")+".dmn");
+				if ((new File(DMN_RESOURCE_PATH)).exists()){
+					
+					Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
+					while (it.hasNext()) {
+						String dmnModel = ((File) it.next()).getPath();
+						String extension = FilenameUtils.getExtension(dmnModel);
+						if (extension.equals("json")) {
+							DMNConverter.convertJsonModelToDMNXml(dmnModel, StringUtils.substringBefore(dmnModel, ".json")+".dmn");
+						}
 					}
+
 				}
 
 			}
