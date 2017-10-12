@@ -53,8 +53,7 @@ public abstract class AbstractDmnTest {
 	@Before
 	public void before() throws Exception {
 		
-		if(env.getProperty ("aps.app.download", Boolean.class, false)){
-			
+		if(System.getProperty("aps.app.download")!=null && System.getProperty("aps.app.download").equals("true")) {
 			ActivitiResources.forceGet(appName);
 		}
 		
