@@ -7,7 +7,6 @@ import org.activiti.bpmn.model.FieldExtension;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.ServiceTask;
 import org.activiti.engine.delegate.DelegateExecution;
-import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.test.ActivitiRule;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
@@ -27,8 +26,7 @@ public class DelegateExecutionAssert extends AbstractAssert<DelegateExecutionAss
 	}
 
 	/**
-	 * Make sure that {@link ProcessInstance} has a name set and is equal to the
-	 * given name.
+	 * Make sure that the field extensions associated with the currentActivty is correct.
 	 * 
 	 * @return this {@link DelegateExecutionAssert}
 	 */
