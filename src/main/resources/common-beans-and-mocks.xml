@@ -8,17 +8,6 @@
 
 	<bean id="activiti_flowConditionsBean" class="com.alfresco.aps.mockdelegates.FlowConditionsBean" />
 	
-	<!-- <mockito:mock id="activiti_executeDecisionDelegate"
-		class="com.alfresco.aps.mockdelegates.ExecuteDecisionBean">
-	</mockito:mock>
-	
-	<mockito:mock id="activiti_restCallDelegate"
-		class="com.alfresco.aps.mockdelegates.RestCallMockClass">
-	</mockito:mock>
-	<mockito:mock id="activiti_publishAlfrescoDelegate"
-		class="com.alfresco.aps.mockdelegates.AlfrescoPublishDelegate">
-	</mockito:mock> -->
-	
 	<bean id="activiti_executeDecisionDelegate" class="org.mockito.Mockito" factory-method="mock"> 
     	<constructor-arg value="com.alfresco.aps.mockdelegates.ExecuteDecisionBean" /> 
 	</bean>
@@ -34,5 +23,7 @@
 	<bean id="restUtil" class="com.alfresco.aps.testutils.resources.RestUtil" />
 
 	<bean id="unitTestHelpers" class="com.alfresco.aps.testutils.UnitTestHelpers" />
+	
+	<bean id="springBeanLookupUtil" class="com.alfresco.aps.testutils.SpringBeanLookupUtil" />
 
 </beans>

@@ -3,8 +3,6 @@ package com.alfresco.aps.testutils;
 import static org.assertj.core.api.Assertions.*;
 import static com.alfresco.aps.testutils.TestUtilsConstants.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -12,17 +10,14 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.activiti.bpmn.model.ExtensionElement;
 import org.activiti.bpmn.model.FieldExtension;
 import org.activiti.bpmn.model.FlowElement;
 import org.activiti.bpmn.model.ReceiveTask;
 import org.activiti.bpmn.model.ServiceTask;
-import org.activiti.engine.TaskService;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ExecutionQuery;
 import org.activiti.engine.runtime.Job;
-import org.activiti.engine.task.IdentityLink;
 import org.activiti.engine.task.Task;
 import org.activiti.engine.test.ActivitiRule;
 import org.joda.time.DateTime;
@@ -56,20 +51,7 @@ public class UnitTestHelpers {
 		}
 	}
 
-	public void assertTaskDueDate(Integer expectedNumberFromCreateTime, String expectedUnit, Task task) {
-		Date dueDate = task.getDueDate();
-		Date createTime = task.getCreateTime();
-		assertThat(dueDate).isNotNull();
-
-		// Ignoring seconds as it is hard to get the precision!
-		DateTimeFormatter formatter = ISODateTimeFormat.dateHourMinute();
-		String exepctedDate = formatter
-				.print(calculateExpectedDate(expectedNumberFromCreateTime, expectedUnit, createTime));
-		String actualDate = formatter.print(new DateTime(dueDate));
-		assertThat(actualDate).as("Check due date").isEqualTo(exepctedDate);
-	}
-
-	private DateTime calculateExpectedDate(Integer expectedNumber, String expectedUnit, Date createTime) {
+	public static DateTime calculateExpectedDate(Integer expectedNumber, String expectedUnit, Date createTime) {
 		DateTime exepctedDate;
 		switch (expectedUnit) {
 		case TIME_UNIT_DAY:
@@ -93,11 +75,6 @@ public class UnitTestHelpers {
 
 	public String getTaskOutcomeVariable(Task task) {
 		return "form" + task.getFormKey() + "outcome";
-	}
-
-	public void assertNullProcessInstance(String processInstanceId) {
-		assertThat(activitiRule.getRuntimeService().createProcessInstanceQuery().processInstanceId(processInstanceId)
-				.list().size() == 0).isTrue();
 	}
 
 	public void assertHistoricVariableValues(String processInstanceId, Map<String, Object> expectedVariables) {
@@ -191,93 +168,6 @@ public class UnitTestHelpers {
 				assertThat(fieldFound).isTrue();
 			}
 			
-		}
-	}
-
-	public void assertUserAssignment(String expectedAssignee, Task task, Boolean assignmentLookupRequired,
-			Boolean isUserLookupBasedOnExternalId) {
-		if (assignmentLookupRequired != null && assignmentLookupRequired) {
-			Map<String, List<ExtensionElement>> extensionElements = activitiRule.getRepositoryService()
-					.getBpmnModel(task.getProcessDefinitionId()).getFlowElement(task.getTaskDefinitionKey())
-					.getExtensionElements();
-			for (Map.Entry<String, List<ExtensionElement>> entry : extensionElements.entrySet()) {
-				if (isUserLookupBasedOnExternalId && entry.getKey().equals("assignee-info-externalid")) {
-					assertThat(entry.getValue().get(0).getElementText()).as("Check assignee id ").isEqualTo(expectedAssignee);
-				} else if (!isUserLookupBasedOnExternalId && entry.getKey().equals("assignee-info-email")) {
-					assertThat(entry.getValue().get(0).getElementText()).as("Check assignee email ").isEqualTo(expectedAssignee);
-				}
-			}
-		} else {
-			assertThat(task.getAssignee()).as("Check assignee ").isEqualTo(expectedAssignee);
-		}
-	}
-
-	public void assertCandidateAssignment(String[] expectedGroups, String[] expectedUsers, Task task,
-			Boolean assignmentLookupRequired, Boolean isUserLookupBasedOnExternalId) {
-
-		List<String> groupIdArray = new ArrayList<String>();
-		List<String> userIdArray = new ArrayList<String>();
-		List<String> expectedGroupsArray = new ArrayList<String>();
-		List<String> expectedUsersArray = new ArrayList<String>();
-
-		if (expectedGroups != null) {
-			expectedGroupsArray = Arrays.asList(expectedGroups);
-		}
-		if (expectedUsers != null) {
-			expectedUsersArray = Arrays.asList(expectedUsers);
-		}
-
-		if (assignmentLookupRequired != null && assignmentLookupRequired) {
-			Map<String, List<ExtensionElement>> extensionElements = activitiRule.getRepositoryService()
-					.getBpmnModel(task.getProcessDefinitionId()).getFlowElement(task.getTaskDefinitionKey())
-					.getExtensionElements();
-			for (Map.Entry<String, List<ExtensionElement>> entry : extensionElements.entrySet()) {
-				if (entry.getKey().startsWith("group-info-name-")
-						&& expectedGroupsArray.contains(entry.getValue().get(0).getElementText())) {
-					groupIdArray.add(entry.getKey().substring(entry.getKey().lastIndexOf("-") + 1));
-				} else if (isUserLookupBasedOnExternalId && entry.getKey().startsWith("user-info-externalid-")
-						&& expectedUsersArray.contains(entry.getValue().get(0).getElementText())) {
-					userIdArray.add(entry.getKey().substring(entry.getKey().lastIndexOf("-") + 1));
-				} else if (!isUserLookupBasedOnExternalId && entry.getKey().startsWith("user-info-email-")
-						&& expectedUsersArray.contains(entry.getValue().get(0).getElementText())) {
-					userIdArray.add(entry.getKey().substring(entry.getKey().lastIndexOf("-") + 1));
-				}
-			}
-		} else {
-			if (expectedGroups != null) {
-				groupIdArray = Arrays.asList(expectedGroups);
-			}
-			if (expectedUsers != null) {
-				userIdArray = Arrays.asList(expectedUsers);
-			}
-		}
-
-		TaskService taskService = activitiRule.getTaskService();
-		int candidateGroupSize = 0;
-		int candidateUserSize = 0;
-
-		for (IdentityLink idLink : taskService.getIdentityLinksForTask(task.getId())) {
-			if (idLink.getGroupId() != null) {
-				String groupId = idLink.getGroupId();
-				// Assert candidate group
-				assertThat(groupIdArray.contains(groupId)).isTrue();
-				candidateGroupSize++;
-			}
-			if (idLink.getUserId() != null && !idLink.getType().equals("assignee")) {
-				String userId = idLink.getUserId();
-				// Assert candidate user
-				assertThat(userIdArray.contains(userId)).isTrue();
-				candidateUserSize++;
-			}
-		}
-
-		// Assert candidate group count
-		if (expectedGroups != null) {
-			assertThat(candidateGroupSize).as("Check candidate group size ").isEqualTo(expectedGroups.length);
-		}
-		// Assert candidate user count
-		if (expectedUsers != null) {
-			assertThat(candidateUserSize).as("Check user size ").isEqualTo(expectedUsers.length);
 		}
 	}
 
