@@ -35,14 +35,15 @@ public class ActivitiResources {
 		JSONObject appDeployments = null;
 		try {
 			appDeployments = RestUtil.getAppDeployments(
-					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_BASE_URL) + activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_DEFINITIONS),
+					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_BASE_URL)
+							+ activitiResourceProperties
+									.getProperty(ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_DEFINITIONS),
 					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_USER),
 					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_PASSWORD));
-		}
-		catch (Exception e) {
-			
-				throw e;
-			
+		} catch (Exception e) {
+
+			throw e;
+
 		}
 
 		if (appDeployments != null) {
@@ -50,51 +51,60 @@ public class ActivitiResources {
 			log.info("Searching for the app deployment.");
 
 			JSONObject appDeployment = null;
-			for (int i=0; i < appDeployments.getJSONArray(ActivitiResources.DATA).length(); ++i) {
-				if (appName.equals(appDeployments.getJSONArray(ActivitiResources.DATA).getJSONObject(i).getString(ActivitiResources.NAME))) {
+			for (int i = 0; i < appDeployments.getJSONArray(ActivitiResources.DATA).length(); ++i) {
+				if (appName.equals(appDeployments.getJSONArray(ActivitiResources.DATA).getJSONObject(i)
+						.getString(ActivitiResources.NAME))) {
 					appDeployment = appDeployments.getJSONArray(ActivitiResources.DATA).getJSONObject(i);
 				}
 			}
 			if (appDeployment == null) {
-					throw new RuntimeException("Cannot find the app deployment with name '" + appName + "'.");
-			}
-			else {
+				throw new RuntimeException("Cannot find the app deployment with name '" + appName + "'.");
+			} else {
 
-				String appResourcePath = System.getProperty("user.dir") + File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator + "app";
+				String appResourcePath = System.getProperty("user.dir") + File.separator + "src" + File.separator
+						+ "main" + File.separator + "resources" + File.separator + "app";
 				String appResourceZip = appResourcePath + File.separator + "app.zip";
-				
+
 				log.info("Getting the app resources locally.");
 
 				if ((new File(appResourceZip)).exists()) {
 					throw new RuntimeException("App zip already exists.");
 				}
-				
-				log.info("Cleaning the app directory before download."); 
-				
+
+				log.info("Cleaning the app directory before download.");
+
 				File rootDirectory = (new File(appResourcePath));
-				FileUtils.cleanDirectory(rootDirectory); 
+				FileUtils.cleanDirectory(rootDirectory);
 
 				RestUtil.getAppResource(
-					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_BASE_URL) 
-						+ activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_EXPORT_PREFIX)
-						+ appDeployment.getString(ActivitiResources.ID)
-						+ activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_EXPORT_POSTFIX),
-					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_USER),
-					activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_PASSWORD),
-					appResourceZip);
+						activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_BASE_URL)
+								+ activitiResourceProperties.getProperty(
+										ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_EXPORT_PREFIX)
+								+ appDeployment.getString(ActivitiResources.ID)
+								+ activitiResourceProperties.getProperty(
+										ActivitiResourceProperties.ACTIVITI_REST_ENDPOINT_APP_EXPORT_POSTFIX),
+						activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_USER),
+						activitiResourceProperties.getProperty(ActivitiResourceProperties.ACTIVITI_PASSWORD),
+						appResourceZip);
 
 				log.info("Unzipping the app locally.");
 
 				zipExtract(appName, appResourceZip, appResourcePath);
 				(new File(appResourceZip)).delete();
-				if ((new File(DMN_RESOURCE_PATH)).exists()){
-					
+
+				/*
+				 * Temporary workaround to create dmn xml from json until
+				 * https://issues.alfresco.com/jira/browse/ACTIVITI-994 is fixed
+				 */
+				if ((new File(DMN_RESOURCE_PATH)).exists()) {
+
 					Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
 					while (it.hasNext()) {
 						String dmnModel = ((File) it.next()).getPath();
 						String extension = FilenameUtils.getExtension(dmnModel);
 						if (extension.equals("json")) {
-							DMNConverter.convertJsonModelToDMNXml(dmnModel, StringUtils.substringBefore(dmnModel, ".json")+".dmn");
+							DMNConverter.convertJsonModelToDMNXml(dmnModel,
+									StringUtils.substringBefore(dmnModel, ".json") + ".dmn");
 						}
 					}
 
@@ -103,7 +113,7 @@ public class ActivitiResources {
 			}
 		}
 	}
-	
+
 	public static void forceGet(String appName) throws Exception {
 
 		get(appName);
@@ -113,7 +123,7 @@ public class ActivitiResources {
 	private static void zipExtract(String zipName, String zipPath, String targetFloder) {
 
 		try {
-			
+
 			ZipFile zipFile = new ZipFile(zipPath);
 			Enumeration<?> enu = zipFile.entries();
 			while (enu.hasMoreElements()) {

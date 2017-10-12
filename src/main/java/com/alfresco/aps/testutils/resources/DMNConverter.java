@@ -17,20 +17,21 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * Temporary workaround to create dmn xml from json until https://issues.alfresco.com/jira/browse/ACTIVITI-994 is fixed
  */
 public class DMNConverter {
-	
-	public static void convertJsonModelToDMNXml(String dmnFilePath, String outputPath) throws JsonProcessingException, IOException{
+
+	public static void convertJsonModelToDMNXml(String dmnFilePath, String outputPath)
+			throws JsonProcessingException, IOException {
 		DmnJsonConverter dmnJsonConverter = new DmnJsonConverter();
 		DmnXMLConverter dmnXMLConverter = new DmnXMLConverter();
-        DmnDefinition dmnDefinition = null;
+		DmnDefinition dmnDefinition = null;
 		ObjectMapper objectMapper = new ObjectMapper();
-		
+
 		InputStream is = new FileInputStream(dmnFilePath);
 		ObjectNode editorJsonNode = (ObjectNode) objectMapper.readTree(is).get("editorJson");
 		is.close();
-		
+
 		dmnDefinition = dmnJsonConverter.convertToDmn(editorJsonNode, 1L, 1, new Date());
 		byte[] xmlBytes = dmnXMLConverter.convertToXML(dmnDefinition, "UTF-8");
-		
+
 		FileOutputStream fos = new FileOutputStream(outputPath);
 		fos.write(xmlBytes);
 		fos.close();
