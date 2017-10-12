@@ -1,4 +1,4 @@
-package com.alfresco.aps.testutils;
+package com.alfresco.aps.testutils.assertions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +17,9 @@ import org.assertj.core.api.Assertions;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+
+import com.alfresco.aps.testutils.SpringBeanLookupUtil;
+import com.alfresco.aps.testutils.UnitTestHelpers;
 
 public class TaskAssert extends AbstractAssert<TaskAssert, Task> {
 
