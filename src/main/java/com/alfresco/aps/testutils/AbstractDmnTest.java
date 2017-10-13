@@ -27,37 +27,44 @@ public abstract class AbstractDmnTest {
 
 	@Autowired
 	protected ApplicationContext appContext;
-	
+
 	@Autowired
 	protected Environment env;
-	
+
 	@Autowired
 	protected DmnRepositoryService repositoryService;
-	
+
 	@Autowired
 	protected DmnRuleService ruleService;
-    
-    @Autowired
-    protected DmnEngine dmnEngine;
-    
-    @Autowired
-    protected DmnEngineConfiguration dmnEngineConfiguration;
-    
-    @Autowired
-    protected ActivitiDmnRule activitiDmnRule;
-	
+
+	@Autowired
+	protected DmnEngine dmnEngine;
+
+	@Autowired
+	protected DmnEngineConfiguration dmnEngineConfiguration;
+
+	@Autowired
+	protected ActivitiDmnRule activitiDmnRule;
+
 	protected static ArrayList<Long> deploymentList = new ArrayList<Long>();
 	protected static String appName;
 	protected static String decisonTableKey;
-	
+
+	/*
+	 * Including it in the Abstract Class to avoid writing this in all the
+	 * Tests. Pre test logic - 
+	 * 1) 	Download from APS if system property -Daps.app.download=true 
+	 * 2) 	Find all the dmn files in {@value
+	 * DMN_RESOURCE_PATH} and deploy to dmn engine
+	 */
 	@Before
 	public void before() throws Exception {
-		
-		if(System.getProperty("aps.app.download")!=null && System.getProperty("aps.app.download").equals("true")) {
+
+		if (System.getProperty("aps.app.download") != null && System.getProperty("aps.app.download").equals("true")) {
 			ActivitiResources.forceGet(appName);
 		}
-		
-		//Deploy the dmn files
+
+		// Deploy the dmn files
 		Iterator<File> it = FileUtils.iterateFiles(new File(DMN_RESOURCE_PATH), null, false);
 		while (it.hasNext()) {
 			String bpmnXml = ((File) it.next()).getPath();
@@ -71,6 +78,10 @@ public abstract class AbstractDmnTest {
 		}
 	}
 
+	/*
+	 * Post test logic - 
+	 * 1) 	Delete all deployments
+	 */
 	@After
 	public void after() {
 		for (Long deploymentId : deploymentList) {
