@@ -49,7 +49,7 @@ public abstract class AbstractBpmnTest {
 
 	@Autowired
 	protected ApplicationContext appContext;
-	
+
 	@Autowired
 	protected Environment env;
 
@@ -76,24 +76,28 @@ public abstract class AbstractBpmnTest {
 
 	@Autowired
 	protected SpringProcessEngineConfiguration processEngineConfiguration;
-	
+
 	protected static List<EmailType> actualEmails = new ArrayList<EmailType>();
-	
+
 	@Autowired
 	protected RestCallMockClass activiti_restCallDelegate;
-	
+
 	@Autowired
 	protected ExecuteDecisionBean activiti_executeDecisionDelegate;
-	
+
 	@Autowired
 	protected AlfrescoPublishDelegate activiti_publishAlfrescoDelegate;
-	
+
 	protected static Set<String> activityIdSet = new TreeSet<String>();
 	protected static Set<String> flowElementIdSet = new TreeSet<String>();
 	protected static String appName;
 	protected static String processDefinitionKey;
 	protected static String processDefinitionId;
 
+	/*
+	 * Setting up the mock email transport which can be used for testing email
+	 * steps in BPMN
+	 */
 	@BeforeClass
 	public static void setUp() {
 		Properties props = new Properties();
@@ -116,11 +120,20 @@ public abstract class AbstractBpmnTest {
 			// logger.error(e);
 		}
 	}
-	
+
+	/* Including it in the Abstract Class to avoid writing this in all the Tests.
+	 * Pre-test logic flow - 
+	 * 1) 	Download from APS if system property -Daps.app.download=true
+	 * 2) 	Find all the bpmn20.xml's in {@value
+	 * 		BPMN_RESOURCE_PATH} and deploy to process engine 
+	 * 3)	Find all the elements in the process that is being tested. This set will 
+	 * 		be compared with another set that contains the process elements that are 
+	 * 		covered in each tests (this get updated after each tests).
+	 */
 	@Before
 	public void before() throws Exception {
-		
-		if(System.getProperty("aps.app.download")!=null && System.getProperty("aps.app.download").equals("true")) {
+
+		if (System.getProperty("aps.app.download") != null && System.getProperty("aps.app.download").equals("true")) {
 			ActivitiResources.forceGet(appName);
 		}
 
@@ -144,6 +157,11 @@ public abstract class AbstractBpmnTest {
 		}
 	}
 
+	/*
+	 * Post-test logic flow - 
+	 * 1) 	Update activityIdSet (Set containing all the elements tested)
+	 * 2) 	Delete all deployments
+	 */
 	@After
 	public void after() {
 		for (HistoricActivityInstance act : historyService.createHistoricActivityInstanceQuery().list()) {
@@ -154,17 +172,19 @@ public abstract class AbstractBpmnTest {
 			activitiRule.getRepositoryService().deleteDeployment(deployment.getId(), true);
 		}
 	}
-	
+
+	/*
+	 * Tear down logic - Compare the flowElementIdSet with activityIdSet and
+	 * alert the developer if some parts are not tested
+	 */
 	@AfterClass
 	public static void afterClass() {
 		if (!flowElementIdSet.equals(activityIdSet)) {
 			System.out.println(
 					"***********PROCESS TEST COVERAGE WARNING: Not all paths are being tested, please review the test cases!***********");
-			System.out.println("Steps In Model: "+ flowElementIdSet);
-			System.out.println("Steps Tested: "+ activityIdSet);
+			System.out.println("Steps In Model: " + flowElementIdSet);
+			System.out.println("Steps Tested: " + activityIdSet);
 		}
 	}
-	
-	
 
 }
